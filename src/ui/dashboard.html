@@ -3,495 +3,866 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Talkar Spaces — Executive Operations & Live Visit Hub</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Talkar Spaces — Enterprise Space & Visit Operations CRM</title>
+  
+  <!-- Inter & Plus Jakarta Sans fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
           },
           colors: {
-            surface: {
-              900: '#0B0D13',
-              800: '#121620',
-              700: '#1A202E',
-              600: '#232B3D',
-              border: '#2A344A',
-            },
-            accent: {
-              DEFAULT: '#3B82F6',
-              glow: '#60A5FA',
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
             }
           }
         }
       }
     }
   </script>
+
   <style>
     body {
-      background-color: #0B0D13;
-      color: #E2E8F0;
-      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      background-color: #F8FAFC;
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
+    
+    /* Clean enterprise scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #121620;
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #2A344A;
-      border-radius: 9999px;
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #3B82F6;
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
     }
-    @keyframes pulse-subtle {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.85; transform: scale(1.02); }
-    }
-    .pulse-live {
-      animation: pulse-subtle 2s infinite ease-in-out;
+
+    .tab-btn.active {
+      color: #2563EB;
+      border-bottom: 2px solid #2563EB;
+      font-weight: 600;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
 
-  <!-- Top Executive Navigation Bar -->
-  <header class="border-b border-surface-border bg-surface-800/90 backdrop-blur sticky top-0 z-40">
+  <!-- Top Enterprise Navbar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
-      <!-- Left: Brand & Tenant Selector -->
-      <div class="flex items-center space-x-4">
-        <div class="flex items-center space-x-2.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-extrabold text-lg">
-            S
+      <!-- Left: Logo & Organization Selector -->
+      <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-base shadow-sm">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
           </div>
           <div>
-            <div class="text-sm font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              TALKAR <span class="text-blue-400 font-bold">SPACES</span>
-              <span class="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">Operations</span>
+            <div class="text-sm font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
+              TALKAR <span class="text-blue-600 font-bold">SPACES</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">CRM</span>
             </div>
-            <div class="text-[11px] text-slate-400 font-medium">Universal Inbound & Tour Engine</div>
+            <div id="orgSubheading" class="text-xs text-slate-500 font-medium">Workspace & Asset Operations</div>
           </div>
         </div>
 
-        <div class="h-6 w-px bg-surface-border"></div>
+        <div class="h-6 w-px bg-slate-200"></div>
 
-        <!-- Multi-Tenant Organization Switcher -->
-        <div class="relative">
-          <select id="orgSelector" onchange="switchOrganization(this.value)" class="bg-surface-700 border border-surface-border text-white text-xs font-semibold rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:border-blue-500 cursor-pointer">
-            <option value="elite-coworks">Elite Co-Works (Bengaluru)</option>
-            <option value="prestige-properties">Prestige Luxury Estates (Real Estate)</option>
-          </select>
+        <!-- Tenant Selector -->
+        <div class="flex items-center space-x-2">
+          <label for="orgSelector" class="text-xs font-medium text-slate-500">Workspace:</label>
+          <div class="relative">
+            <select id="orgSelector" onchange="switchOrganization(this.value)" class="bg-white border border-slate-300 text-slate-800 text-xs font-semibold rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm cursor-pointer hover:border-slate-400 transition">
+              <option value="elite-coworks">Elite Co-Works (Bengaluru)</option>
+              <option value="prestige-properties">Prestige Luxury Estates</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <!-- Right: Live System Status & Fast Actions -->
+      <!-- Right: Global Actions & Live Sync Status -->
       <div class="flex items-center space-x-3">
-        <!-- Live Call Ticker Indicator -->
-        <div id="liveCallStatus" class="flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          <span>Voice Agent Online: Riya</span>
+        <!-- Live System Status (Clean, Non-pulsing) -->
+        <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-slate-100 rounded-lg border border-slate-200 text-xs font-medium text-slate-600">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Live Sync Active</span>
         </div>
 
-        <!-- Location Filter -->
-        <select id="locationSelector" onchange="filterLocation(this.value)" class="bg-surface-700 border border-surface-border text-slate-300 text-xs font-medium rounded-lg px-3 py-1.5 focus:outline-none">
-          <option value="ALL">All Centres</option>
-          <option value="BTM">BTM Layout</option>
-          <option value="JPN">JP Nagar</option>
-          <option value="BNG">Bannerghatta</option>
-        </select>
+        <!-- Quick Schedule Button -->
+        <button onclick="openActionModal('VISIT')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 transition shadow-sm">
+          <i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span>Schedule Tour</span>
+        </button>
 
-        <button onclick="openSimulationModal()" class="flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow-sm transition">
-          <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
-          <span>Simulate Call</span>
+        <button onclick="openActionModal('BOOKING')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>New Reservation</span>
         </button>
       </div>
 
     </div>
   </header>
 
-  <!-- Main Content Dashboard -->
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- Active Call Live Pitch Ticker (Shows during live inbound call) -->
-    <div id="liveCallCard" class="hidden rounded-2xl bg-gradient-to-r from-blue-950/60 to-surface-800 border border-blue-500/30 p-4 shadow-xl transition-all">
-      <div class="flex items-start justify-between">
+    <!-- Active Call Alert Banner (Only visible when an AI call is actively underway) -->
+    <div id="liveCallCard" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm transition">
+      <div class="flex items-center justify-between flex-wrap gap-3">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
-            <i data-lucide="phone" class="w-5 h-5 animate-bounce"></i>
+          <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">
+            <i data-lucide="phone-call" class="w-4 h-4"></i>
           </div>
           <div>
             <div class="flex items-center space-x-2">
-              <span class="text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded bg-blue-500 text-white font-mono">INBOUND CALL ACTIVE</span>
-              <span id="liveCallerPhone" class="text-sm font-bold text-white font-mono">+91 98450 XXXXX</span>
-              <span id="liveCallerName" class="text-xs text-slate-400">— Caller Speaking</span>
+              <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Live Inbound Call Processed</span>
+              <span class="text-xs text-slate-400">•</span>
+              <span id="liveCallerName" class="text-xs font-semibold text-slate-800">Prospective Customer</span>
+              <span id="liveCallerPhone" class="text-xs font-medium text-slate-500 font-mono">+91 00000 00000</span>
             </div>
-            <div id="liveCallSummary" class="text-xs text-slate-300 mt-1">
-              "Customer inquiring for a 4-person lockable cabin in BTM Layout from 1st December..."
-            </div>
+            <p id="liveCallSummary" class="text-xs text-slate-600 mt-0.5">Capturing caller requirements and booking details via AI Voice Receptionist...</p>
           </div>
         </div>
         <div class="flex items-center space-x-2">
-          <span id="liveLeadScoreBadge" class="text-xs font-extrabold px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono">
-            SCORE: 65 PTS
+          <span id="liveLeadScoreBadge" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+            Priority Lead
           </span>
-          <span class="text-xs font-extrabold px-2.5 py-1 rounded bg-rose-500/20 border border-rose-500/30 text-rose-300">
-            🔥 HOT PROSPECT
-          </span>
+          <button onclick="dismissCallAlert()" class="text-slate-400 hover:text-slate-600 p-1">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Executive KPI Row -->
+    <!-- Executive Metric Cards (4 KPIs) -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       
-      <!-- Metric 1: Confirmed Slot Revenue -->
-      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
-        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
-          <span>Instant Slot Revenue</span>
-          <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+      <!-- Metric 1: Scheduled Site Tours -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Scheduled Tours</span>
+          <div class="w-7 h-7 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+          </div>
         </div>
-        <div class="mt-2 text-2xl font-extrabold text-white font-mono" id="kpiRevenue">₹0</div>
-        <div class="mt-1 flex items-center text-[11px] text-emerald-400 font-medium">
-          <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> Paid day passes & meeting rooms
+        <div class="flex items-baseline space-x-2">
+          <span id="statToursCount" class="text-2xl font-bold text-slate-900">0</span>
+          <span class="text-xs text-slate-500 font-medium">site visits booked</span>
         </div>
-      </div>
-
-      <!-- Metric 2: Scheduled Tours -->
-      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
-        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
-          <span id="kpiTourLabel">Site Tours Booked</span>
-          <i data-lucide="calendar-check-2" class="w-4 h-4 text-blue-400"></i>
-        </div>
-        <div class="mt-2 text-2xl font-extrabold text-white font-mono" id="kpiTours">0</div>
-        <div class="mt-1 flex items-center text-[11px] text-blue-400 font-medium">
-          <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> Locked on centre calendars
+        <div class="mt-2 text-xs text-emerald-600 font-medium flex items-center gap-1">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>Auto-assigned to Centre Managers</span>
         </div>
       </div>
 
-      <!-- Metric 3: Hot Leads (SLA < 15 Min) -->
-      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
-        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
-          <span>High-Priority Inquiries</span>
-          <i data-lucide="flame" class="w-4 h-4 text-rose-400"></i>
+      <!-- Metric 2: Confirmed Bookings -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Bookings</span>
+          <div class="w-7 h-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          </div>
         </div>
-        <div class="mt-2 text-2xl font-extrabold text-rose-400 font-mono" id="kpiHotLeads">0</div>
-        <div class="mt-1 flex items-center text-[11px] text-rose-300 font-medium">
-          <i data-lucide="clock" class="w-3 h-3 mr-1"></i> Follow-up SLA: &lt; 15 mins
+        <div class="flex items-baseline space-x-2">
+          <span id="statBookingsCount" class="text-2xl font-bold text-slate-900">0</span>
+          <span class="text-xs text-slate-500 font-medium">desk & room reservations</span>
+        </div>
+        <div class="mt-2 text-xs text-blue-600 font-medium flex items-center gap-1">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span>Instant holds with 15m expiration</span>
         </div>
       </div>
 
-      <!-- Metric 4: Total Inbound Leads -->
-      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
-        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
-          <span>Total Inbound Pipeline</span>
-          <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i>
+      <!-- Metric 3: Total Inquiries -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Inbound Enquiries</span>
+          <div class="w-7 h-7 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="users" class="w-4 h-4"></i>
+          </div>
         </div>
-        <div class="mt-2 text-2xl font-extrabold text-white font-mono" id="kpiTotalLeads">0</div>
-        <div class="mt-1 flex items-center text-[11px] text-slate-400 font-medium">
-          <i data-lucide="bot" class="w-3 h-3 mr-1"></i> Qualified 24x7 by Voice AI
+        <div class="flex items-baseline space-x-2">
+          <span id="statInquiriesCount" class="text-2xl font-bold text-slate-900">0</span>
+          <span class="text-xs text-slate-500 font-medium">total leads captured</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-500 font-medium flex items-center gap-1">
+          <span id="statHotLeadsCount" class="font-semibold text-slate-800">0</span> high-intent leads qualified
+        </div>
+      </div>
+
+      <!-- Metric 4: Reserved Revenue -->
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Reserved Revenue</span>
+          <div class="w-7 h-7 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="indian-rupee" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <span id="statRevenueAmount" class="text-2xl font-bold text-slate-900">₹0</span>
+          <span class="text-xs text-slate-500 font-medium">paid & confirmed</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-500 font-medium flex items-center gap-1">
+          <i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>WhatsApp receipts automatically sent</span>
         </div>
       </div>
 
     </section>
 
-    <!-- Dual-Track Operational Board -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Filters & Search Toolbar -->
+    <section class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Tabs -->
+      <div class="flex items-center space-x-1 border-b border-slate-200 w-full md:w-auto">
+        <button onclick="setTab('visits')" id="tabVisits" class="tab-btn active px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+          <span>Site Tours & Visits</span>
+          <span id="tabCountVisits" class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold">0</span>
+        </button>
 
-      <!-- Column 1: Track 2 — High-Ticket Site Visits & Tours -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-            <h2 class="text-sm font-extrabold text-white tracking-wide uppercase font-mono">
-              Track 2: In-Person Site Tours
-            </h2>
-          </div>
-          <span class="text-xs text-slate-400 font-medium" id="visitCountLabel">0 Tours</span>
+        <button onclick="setTab('bookings')" id="tabBookings" class="tab-btn px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>Space Reservations</span>
+          <span id="tabCountBookings" class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold">0</span>
+        </button>
+
+        <button onclick="setTab('leads')" id="tabLeads" class="tab-btn px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+          <i data-lucide="phone-incoming" class="w-4 h-4"></i>
+          <span>Call Logs & Leads</span>
+          <span id="tabCountLeads" class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold">0</span>
+        </button>
+
+        <button onclick="setTab('catalog')" id="tabCatalog" class="tab-btn px-4 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Offered Spaces</span>
+        </button>
+      </div>
+
+      <!-- Search & Centre Filter -->
+      <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+        <!-- Centre Filter -->
+        <div class="relative w-full sm:w-auto">
+          <select id="locationFilter" onchange="filterData()" class="w-full sm:w-auto bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="ALL">All Centres</option>
+          </select>
         </div>
 
-        <div id="siteVisitsFeed" class="space-y-3 custom-scrollbar max-h-[600px] overflow-y-auto pr-1">
-          <!-- Site visits rendered dynamically -->
-          <div class="text-center py-12 text-slate-500 text-xs">Loading tours...</div>
+        <!-- Search Bar -->
+        <div class="relative w-full sm:w-64">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2 text-slate-400"></i>
+          <input type="text" id="searchInput" oninput="filterData()" placeholder="Search name or phone..." class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
         </div>
       </div>
 
-      <!-- Column 2: Track 1 — Instant Slot Holds & Day Passes -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-            <h2 class="text-sm font-extrabold text-white tracking-wide uppercase font-mono">
-              Track 1: Instant Slot Holds & Passes
-            </h2>
-          </div>
-          <span class="text-xs text-slate-400 font-medium" id="bookingCountLabel">0 Bookings</span>
-        </div>
+    </section>
 
-        <div id="bookingsFeed" class="space-y-3 custom-scrollbar max-h-[600px] overflow-y-auto pr-1">
-          <!-- Bookings rendered dynamically -->
-          <div class="text-center py-12 text-slate-500 text-xs">Loading bookings...</div>
+    <!-- TAB 1: SITE VISITS & TOURS -->
+    <section id="panelVisits" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Scheduled In-Person Walkthrough Tours</h2>
+          <p class="text-xs text-slate-500 mt-0.5">High-intent prospective members scheduled for physical property tours</p>
         </div>
-      </div>
-
-    </div>
-
-    <!-- Live Inquiries Table -->
-    <section class="rounded-xl bg-surface-800 border border-surface-border overflow-hidden">
-      <div class="p-4 border-b border-surface-border flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <i data-lucide="layers" class="w-4 h-4 text-blue-400"></i>
-          <h3 class="text-sm font-bold text-white">Inbound Lead Pipeline & Qualification Records</h3>
-        </div>
-        <span class="text-xs text-slate-400">Automated CRM sync with progressive slot filling</span>
+        <span class="text-xs text-slate-500 font-medium">WhatsApp passes automatically dispatched</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr class="border-b border-surface-border bg-surface-700/50 text-slate-400 uppercase font-mono text-[10px] tracking-wider">
-              <th class="py-3 px-4">Contact</th>
-              <th class="py-3 px-4">Intent</th>
-              <th class="py-3 px-4">Requirement / Slots</th>
-              <th class="py-3 px-4">Score & Priority</th>
-              <th class="py-3 px-4">Assigned Owner</th>
-              <th class="py-3 px-4">Stage</th>
-              <th class="py-3 px-4 text-right">Actions</th>
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 text-slate-600 uppercase tracking-wider font-semibold border-b border-slate-200 text-[11px]">
+            <tr>
+              <th class="py-3 px-4">Visitor / Contact</th>
+              <th class="py-3 px-4">Centre Location</th>
+              <th class="py-3 px-4">Date & Time Slot</th>
+              <th class="py-3 px-4">Assigned Host</th>
+              <th class="py-3 px-4">Notes & Requirement</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-right">Reference</th>
             </tr>
           </thead>
-          <tbody id="leadsTableBody" class="divide-y divide-surface-border text-slate-300">
-            <tr>
-              <td colspan="7" class="py-8 text-center text-slate-500">Loading pipeline...</td>
-            </tr>
+          <tbody id="visitsTableBody" class="divide-y divide-slate-100 text-slate-700">
+            <!-- Dynamically populated -->
           </tbody>
         </table>
       </div>
     </section>
 
+    <!-- TAB 2: SPACE RESERVATIONS & BOOKINGS -->
+    <section id="panelBookings" class="hidden bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Direct Reservations & Temporary Holds</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Confirmed bookings for meeting rooms, day passes, and flexi desks</p>
+        </div>
+        <span class="text-xs text-slate-500 font-medium">Payment links dispatched via WhatsApp</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 text-slate-600 uppercase tracking-wider font-semibold border-b border-slate-200 text-[11px]">
+            <tr>
+              <th class="py-3 px-4">Customer / Guest</th>
+              <th class="py-3 px-4">Space Plan / Asset</th>
+              <th class="py-3 px-4">Centre</th>
+              <th class="py-3 px-4">Date & Duration</th>
+              <th class="py-3 px-4">Capacity</th>
+              <th class="py-3 px-4">Amount</th>
+              <th class="py-3 px-4">Payment Status</th>
+              <th class="py-3 px-4 text-right">Reference</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTableBody" class="divide-y divide-slate-100 text-slate-700">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: CALL LOGS & INBOUND LEADS -->
+    <section id="panelLeads" class="hidden bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900">Inbound Call Records & Customer Triage</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Full audio playback, AI conversation summaries, and qualified customer needs</p>
+        </div>
+        <span class="text-xs text-slate-500 font-medium">Automatic call recording & summarization</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50 text-slate-600 uppercase tracking-wider font-semibold border-b border-slate-200 text-[11px]">
+            <tr>
+              <th class="py-3 px-4">Contact</th>
+              <th class="py-3 px-4">Requirement / Intent</th>
+              <th class="py-3 px-4">Conversation Summary</th>
+              <th class="py-3 px-4">Priority & Score</th>
+              <th class="py-3 px-4">Call Audio</th>
+              <th class="py-3 px-4">Pipeline Stage</th>
+              <th class="py-3 px-4 text-right">Owner</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody" class="divide-y divide-slate-100 text-slate-700">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 4: CATALOG OF SPACES & ASSETS -->
+    <section id="panelCatalog" class="hidden bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden p-6">
+      <div class="mb-4">
+        <h2 class="text-sm font-bold text-slate-900">Current Spaces & Rate Cards</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Inventory available for instant voice agent checks and customer reservations</p>
+      </div>
+
+      <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
   </main>
 
-  <!-- Simulation Modal -->
-  <div id="simulationModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-surface-800 border border-surface-border w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-surface-border pb-3">
-        <div class="text-sm font-bold text-white flex items-center gap-2">
-          <i data-lucide="phone-outgoing" class="w-4 h-4 text-blue-400"></i>
-          Simulate Inbound Voice Call
-        </div>
-        <button onclick="closeSimulationModal()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
+  <!-- Modal for Creating New Tour or Reservation (Clean Business Modal) -->
+  <div id="actionModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <h3 id="modalTitle" class="text-sm font-bold text-slate-900">Schedule In-Person Tour</h3>
+        <button onclick="closeActionModal()" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div class="space-y-3 text-xs">
+      <form id="actionForm" onsubmit="submitActionForm(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block text-slate-400 mb-1 font-medium">Caller Name</label>
-          <input type="text" id="simName" value="Rahul Sharma" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+          <label class="block font-semibold text-slate-700 mb-1">Customer Full Name</label>
+          <input type="text" id="modalCustomerName" required placeholder="e.g. Rahul Sharma" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-        <div>
-          <label class="block text-slate-400 mb-1 font-medium">Phone Number (E.164)</label>
-          <input type="text" id="simPhone" value="+919845099887" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-blue-500">
-        </div>
-        <div>
-          <label class="block text-slate-400 mb-1 font-medium">Target Centre</label>
-          <select id="simCentre" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-            <option value="BTM">BTM Layout 1st Stage</option>
-            <option value="JPN">JP Nagar 6th Phase</option>
-            <option value="BNG">Bannerghatta Road</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-slate-400 mb-1 font-medium">Inquiry Type</label>
-          <select id="simTrack" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
-            <option value="VISIT">Track 2: Private Cabin (4 Seats) — Book Site Tour</option>
-            <option value="HOLD">Track 1: Meeting Room (2 Hours) — Instant 15m Hold</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-surface-border">
-        <button onclick="closeSimulationModal()" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white text-xs">Cancel</button>
-        <button onclick="executeSimulation()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition">
-          Trigger Call & Watch Board
-        </button>
-      </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Mobile Phone (WhatsApp Enabled)</label>
+          <input type="tel" id="modalCustomerPhone" required placeholder="+91 98450 12345" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Centre Location</label>
+            <select id="modalLocation" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div id="modalAssetField">
+            <label class="block font-semibold text-slate-700 mb-1">Space Plan</label>
+            <select id="modalAsset" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Scheduled Date</label>
+            <input type="date" id="modalDate" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Time Slot</label>
+            <input type="text" id="modalTimeSlot" placeholder="e.g. 2:30 PM" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Notes / Requirement</label>
+          <textarea id="modalNotes" rows="2" placeholder="e.g. Looking for 6-person team cabin from next month" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-2">
+          <button type="button" onclick="closeActionModal()" class="px-3.5 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold transition">Cancel</button>
+          <button type="submit" id="modalSubmitBtn" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-sm">Confirm & Send WhatsApp</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- JavaScript Client Application -->
+  <!-- Client-side Logic -->
   <script>
     let currentOrg = 'elite-coworks';
-    let currentLocation = 'ALL';
+    let currentTab = 'visits';
+    let rawData = null;
     let sseSource = null;
+    let activeActionType = 'VISIT'; // 'VISIT' or 'BOOKING'
 
+    // Format currency cleanly
+    function formatMoney(amount, currency = 'INR') {
+      if (!amount && amount !== 0) return '—';
+      return '₹' + Number(amount).toLocaleString('en-IN');
+    }
+
+    // Switch active Tab
+    function setTab(tab) {
+      currentTab = tab;
+      ['visits', 'bookings', 'leads', 'catalog'].forEach(t => {
+        const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const panel = document.getElementById(`panel${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (panel) panel.classList.toggle('hidden', t !== tab);
+      });
+      lucide.createIcons();
+    }
+
+    // Switch Tenant
+    function switchOrganization(slug) {
+      currentOrg = slug;
+      initSse();
+      loadDashboard();
+    }
+
+    // Dismiss active call alert
+    function dismissCallAlert() {
+      document.getElementById('liveCallCard').classList.add('hidden');
+    }
+
+    // Load full dashboard data from API
     async function loadDashboard() {
       try {
         const res = await fetch(`/api/v1/organizations/${currentOrg}/dashboard`);
         const json = await res.json();
         if (!json.success) return;
-        renderDashboard(json.data);
+
+        rawData = json.data;
+        renderDashboard();
       } catch (err) {
-        console.error('Failed to load dashboard:', err);
+        console.error('Error loading dashboard data:', err);
       }
     }
 
-    function renderDashboard(data) {
-      // 1. Render KPIs
-      document.getElementById('kpiRevenue').innerText = `₹${(data.kpis.totalRevenueReserved || 0).toLocaleString('en-IN')}`;
-      document.getElementById('kpiTours').innerText = data.kpis.totalToursBooked || 0;
-      document.getElementById('kpiHotLeads').innerText = data.kpis.hotLeadsCount || 0;
-      document.getElementById('kpiTotalLeads').innerText = data.kpis.totalInquiries || 0;
+    // Render Dashboard UI
+    function renderDashboard() {
+      if (!rawData) return;
 
-      // 2. Render Tours (Track 2)
-      const toursContainer = document.getElementById('siteVisitsFeed');
-      document.getElementById('visitCountLabel').innerText = `${data.siteVisits.length} Tours`;
+      const { organization, kpis, locations, assets, leads, bookings, siteVisits } = rawData;
 
-      if (data.siteVisits.length === 0) {
-        toursContainer.innerHTML = `<div class="text-center py-12 text-slate-500 text-xs bg-surface-800/40 rounded-xl border border-surface-border">No site tours booked yet. Call the agent to schedule one!</div>`;
-      } else {
-        toursContainer.innerHTML = data.siteVisits.map(v => `
-          <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm hover:border-blue-500/50 transition">
-            <div class="flex items-start justify-between">
-              <div>
-                <div class="flex items-center space-x-2">
-                  <span class="font-bold text-white text-sm">${v.lead?.name || 'Inbound Visitor'}</span>
-                  <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">${v.reference}</span>
-                </div>
-                <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                  <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i> ${v.location?.name || 'Centre'}
-                </div>
-              </div>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono ${v.status === 'SCHEDULED' ? 'bg-blue-500/20 text-blue-300' : 'bg-emerald-500/20 text-emerald-300'}">
-                ${v.status}
-              </span>
-            </div>
+      // Update Org Title
+      document.getElementById('orgSubheading').innerText = `${organization.name} • ${organization.industry}`;
 
-            <div class="mt-3 pt-3 border-t border-surface-border flex items-center justify-between text-xs">
-              <div class="flex items-center text-slate-300 gap-1.5">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
-                <span class="font-medium">${v.visitDate} @ ${v.timeSlot}</span>
-              </div>
-              <div class="text-[11px] text-slate-400">
-                Host: <span class="text-slate-200 font-medium">${v.assignedHostName || 'Centre Advisor'}</span>
-              </div>
-            </div>
+      // Update KPI counters
+      document.getElementById('statToursCount').innerText = kpis.totalToursBooked || 0;
+      document.getElementById('statBookingsCount').innerText = bookings.length || 0;
+      document.getElementById('statInquiriesCount').innerText = kpis.totalInquiries || 0;
+      document.getElementById('statHotLeadsCount').innerText = kpis.hotLeadsCount || 0;
+      document.getElementById('statRevenueAmount').innerText = formatMoney(kpis.totalRevenueReserved);
 
-            <div class="mt-2 text-[11px] text-emerald-400 flex items-center justify-between">
-              <span class="flex items-center gap-1"><i data-lucide="message-square" class="w-3 h-3"></i> WhatsApp Pass Dispatched</span>
-              <span class="font-mono text-slate-500">${v.lead?.phone || ''}</span>
-            </div>
-          </div>
-        `).join('');
+      // Update Tab Counter Badges
+      document.getElementById('tabCountVisits').innerText = siteVisits.length;
+      document.getElementById('tabCountBookings').innerText = bookings.length;
+      document.getElementById('tabCountLeads').innerText = leads.length;
+
+      // Populate Location Filter Dropdown
+      const locFilter = document.getElementById('locationFilter');
+      const currentSelected = locFilter.value;
+      locFilter.innerHTML = '<option value="ALL">All Centres</option>' + 
+        locations.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+      if (currentSelected) locFilter.value = currentSelected;
+
+      // Filter and render tables
+      filterData();
+    }
+
+    // Filter table data by location and search query
+    function filterData() {
+      if (!rawData) return;
+
+      const locId = document.getElementById('locationFilter').value;
+      const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+      // 1. Filter Site Visits
+      let filteredVisits = rawData.siteVisits || [];
+      if (locId !== 'ALL') {
+        filteredVisits = filteredVisits.filter(v => v.locationId === locId);
       }
-
-      // 3. Render Bookings (Track 1)
-      const bookingsContainer = document.getElementById('bookingsFeed');
-      document.getElementById('bookingCountLabel').innerText = `${data.bookings.length} Bookings`;
-
-      if (data.bookings.length === 0) {
-        bookingsContainer.innerHTML = `<div class="text-center py-12 text-slate-500 text-xs bg-surface-800/40 rounded-xl border border-surface-border">No slot holds or bookings active.</div>`;
-      } else {
-        bookingsContainer.innerHTML = data.bookings.map(b => `
-          <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm hover:border-emerald-500/50 transition">
-            <div class="flex items-start justify-between">
-              <div>
-                <div class="flex items-center space-x-2">
-                  <span class="font-bold text-white text-sm">${b.asset?.name || 'Workspace Slot'}</span>
-                  <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${b.bookingReference}</span>
-                </div>
-                <div class="text-xs text-slate-400 mt-0.5">
-                  Guest: <span class="text-slate-200 font-medium">${b.lead?.name || 'Valued Member'}</span> (${b.paxCount} Pax)
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="font-mono text-sm font-extrabold text-white">₹${b.totalAmount.toLocaleString('en-IN')}</div>
-                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${b.paymentStatus === 'PAID' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
-                  ${b.paymentStatus === 'HELD' ? '15m Temporary Hold' : 'Paid Confirmed'}
-                </span>
-              </div>
-            </div>
-
-            <div class="mt-3 pt-3 border-t border-surface-border flex items-center justify-between text-xs text-slate-400">
-              <div>${b.bookingDate} (${b.durationHours} hrs)</div>
-              <div class="text-[11px] text-blue-400 flex items-center gap-1">
-                <i data-lucide="send" class="w-3 h-3"></i> Payment Link Sent via WhatsApp
-              </div>
-            </div>
-          </div>
-        `).join('');
+      if (query) {
+        filteredVisits = filteredVisits.filter(v => 
+          (v.lead?.name || '').toLowerCase().includes(query) ||
+          (v.lead?.phone || '').includes(query) ||
+          (v.reference || '').toLowerCase().includes(query)
+        );
       }
+      renderVisitsTable(filteredVisits);
 
-      // 4. Render Leads Table
-      const leadsTable = document.getElementById('leadsTableBody');
-      leadsTable.innerHTML = data.leads.map(lead => {
-        const custom = JSON.parse(lead.customFields || '{}');
-        const customSummary = Object.entries(custom)
-          .map(([k, v]) => `<span class="px-1.5 py-0.5 rounded bg-surface-700 text-slate-300 font-mono text-[10px]">${k}: ${v}</span>`)
-          .join(' ');
+      // 2. Filter Bookings
+      let filteredBookings = rawData.bookings || [];
+      if (locId !== 'ALL') {
+        filteredBookings = filteredBookings.filter(b => b.locationId === locId);
+      }
+      if (query) {
+        filteredBookings = filteredBookings.filter(b => 
+          (b.lead?.name || '').toLowerCase().includes(query) ||
+          (b.lead?.phone || '').includes(query) ||
+          (b.bookingReference || '').toLowerCase().includes(query)
+        );
+      }
+      renderBookingsTable(filteredBookings);
 
-        return `
-          <tr class="hover:bg-surface-700/30 transition">
-            <td class="py-3 px-4">
-              <div class="font-bold text-white">${lead.name || 'Anonymous Caller'}</div>
-              <div class="font-mono text-[11px] text-slate-400">${lead.phone}</div>
-            </td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-0.5 rounded bg-surface-700 text-slate-300 font-mono text-[11px]">${lead.intent || 'ENQ_DESK'}</span>
-            </td>
-            <td class="py-3 px-4 max-w-xs">
-              <div class="flex flex-wrap gap-1">${customSummary || '<span class="text-slate-500">No extra slots</span>'}</div>
-              ${lead.summary ? `<div class="text-[11px] text-slate-400 mt-1 truncate">${lead.summary}</div>` : ''}
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex items-center space-x-1.5">
-                <span class="font-mono font-extrabold text-xs ${lead.leadScore >= 60 ? 'text-rose-400' : lead.leadScore >= 30 ? 'text-amber-400' : 'text-slate-400'}">
-                  ${lead.leadScore} PTS
-                </span>
-                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${lead.temperature === 'HOT' ? 'bg-rose-500/20 text-rose-300' : lead.temperature === 'WARM' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-700 text-slate-400'}">
-                  ${lead.temperature}
-                </span>
-              </div>
-            </td>
-            <td class="py-3 px-4 text-slate-300">${lead.ownerName || 'Automated Nurture'}</td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">${lead.stage}</span>
-            </td>
-            <td class="py-3 px-4 text-right">
-              <button onclick="alert('Viewing verified lead notes for ' + '${lead.name}')" class="text-blue-400 hover:text-blue-300 font-medium text-xs">View Log</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      // 3. Filter Leads
+      let filteredLeads = rawData.leads || [];
+      if (query) {
+        filteredLeads = filteredLeads.filter(l => 
+          (l.name || '').toLowerCase().includes(query) ||
+          (l.phone || '').includes(query) ||
+          (l.companyName || '').toLowerCase().includes(query)
+        );
+      }
+      renderLeadsTable(filteredLeads);
+
+      // 4. Render Catalog
+      renderCatalog(rawData.assets, rawData.locations, locId);
 
       lucide.createIcons();
     }
 
-    // Connect SSE Live Stream
+    // Render Visits Table
+    function renderVisitsTable(visits) {
+      const tbody = document.getElementById('visitsTableBody');
+      if (visits.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400">No scheduled walkthrough tours match your criteria.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = visits.map(v => `
+        <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+          <td class="py-3.5 px-4">
+            <div class="font-bold text-slate-900">${v.lead?.name || 'Visitor'}</div>
+            <div class="text-[11px] text-slate-500 font-mono">${v.lead?.phone || '—'}</div>
+          </td>
+          <td class="py-3.5 px-4 font-medium text-slate-800">
+            ${v.location?.name || 'Centre'}
+          </td>
+          <td class="py-3.5 px-4">
+            <div class="font-semibold text-slate-900">${v.visitDate}</div>
+            <div class="text-[11px] text-slate-500">${v.timeSlot}</div>
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="text-slate-800 font-medium">${v.assignedHostName || 'Centre Advisor'}</span>
+          </td>
+          <td class="py-3.5 px-4 max-w-xs truncate text-slate-600">
+            ${v.notes || 'Scheduled via Voice Advisor'}
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Confirmed
+            </span>
+          </td>
+          <td class="py-3.5 px-4 text-right font-mono text-slate-500 text-[11px]">
+            ${v.reference}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Render Bookings Table
+    function renderBookingsTable(bookings) {
+      const tbody = document.getElementById('bookingsTableBody');
+      if (bookings.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-400">No active bookings found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = bookings.map(b => {
+        const isPaid = b.paymentStatus === 'PAID';
+        return `
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900">${b.lead?.name || 'Client'}</div>
+              <div class="text-[11px] text-slate-500 font-mono">${b.lead?.phone || '—'}</div>
+            </td>
+            <td class="py-3.5 px-4 font-semibold text-slate-900">
+              ${b.asset?.name || 'Workspace Asset'}
+            </td>
+            <td class="py-3.5 px-4 text-slate-700 font-medium">
+              ${b.location?.name || 'Centre'}
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="font-semibold text-slate-900">${b.bookingDate}</div>
+              <div class="text-[11px] text-slate-500">${b.startTime} (${b.durationHours} hrs)</div>
+            </td>
+            <td class="py-3.5 px-4 text-slate-700">
+              ${b.paxCount} Pax
+            </td>
+            <td class="py-3.5 px-4 font-bold text-slate-900">
+              ${formatMoney(b.totalAmount)}
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
+                ${isPaid ? 'Confirmed & Paid' : '15m Slot Held'}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right font-mono text-slate-500 text-[11px]">
+              ${b.bookingReference}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Leads Table
+    function renderLeadsTable(leads) {
+      const tbody = document.getElementById('leadsTableBody');
+      if (leads.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400">No inbound inquiries logged yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = leads.map(l => {
+        let parsed = {};
+        try { parsed = JSON.parse(l.customFields || '{}'); } catch(e){}
+        const isHot = l.temperature === 'HOT';
+
+        return `
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900">${l.name || 'Anonymous Caller'}</div>
+              <div class="text-[11px] text-slate-500 font-mono">${l.phone}</div>
+            </td>
+            <td class="py-3.5 px-4 font-semibold text-slate-800">
+              ${l.intent || 'General Enquiry'}
+            </td>
+            <td class="py-3.5 px-4 max-w-md text-slate-600 text-xs">
+              ${l.summary || 'Caller requested workspace pricing and availability.'}
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${isHot ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">
+                ${l.leadScore} pts • ${l.temperature || 'WARM'}
+              </span>
+            </td>
+            <td class="py-3.5 px-4">
+              ${l.audioUrl ? `
+                <audio controls class="h-7 w-40 text-xs">
+                  <source src="${l.audioUrl}" type="audio/mpeg">
+                </audio>
+              ` : `
+                <span class="text-[11px] text-slate-400">Call Logged</span>
+              `}
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                ${l.stage}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-right text-slate-600">
+              ${l.ownerName || 'Advisor'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Catalog
+    function renderCatalog(assets, locations, filterLocId) {
+      const container = document.getElementById('catalogGrid');
+      let filteredAssets = assets || [];
+      if (filterLocId !== 'ALL') {
+        filteredAssets = filteredAssets.filter(a => a.locationId === filterLocId);
+      }
+
+      if (filteredAssets.length === 0) {
+        container.innerHTML = `<div class="col-span-3 text-center py-12 text-slate-400">No spaces listed for this centre.</div>`;
+        return;
+      }
+
+      const locMap = {};
+      locations.forEach(l => locMap[l.id] = l.name);
+
+      container.innerHTML = filteredAssets.map(a => `
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:border-slate-300 transition">
+          <div>
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">${locMap[a.locationId] || 'Centre'}</span>
+                <h3 class="font-bold text-slate-900 text-sm mt-0.5">${a.name}</h3>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">${a.type}</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-2">${a.description || 'Flexible executive space with high-speed internet and access to common business lounges.'}</p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
+            <span class="text-slate-500">Capacity: <strong class="text-slate-800">${a.capacity} Pax</strong></span>
+            <div class="text-right">
+              <span class="text-xs font-bold text-slate-900">
+                ${a.priceHourly ? formatMoney(a.priceHourly) + '/hr' : formatMoney(a.priceDaily) + '/day'}
+              </span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Open Action Modal (Create Visit or Booking)
+    function openActionModal(type) {
+      activeActionType = type;
+      const modal = document.getElementById('actionModal');
+      const title = document.getElementById('modalTitle');
+      const submitBtn = document.getElementById('modalSubmitBtn');
+      const assetField = document.getElementById('modalAssetField');
+
+      // Populate locations
+      const locSelect = document.getElementById('modalLocation');
+      locSelect.innerHTML = (rawData.locations || []).map(l => `<option value="${l.code}">${l.name}</option>`).join('');
+
+      // Populate assets
+      const assetSelect = document.getElementById('modalAsset');
+      assetSelect.innerHTML = (rawData.assets || []).map(a => `<option value="${a.code}">${a.name}</option>`).join('');
+
+      // Set default date to today or tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('modalDate').value = tomorrow.toISOString().split('T')[0];
+      document.getElementById('modalTimeSlot').value = '11:00 AM';
+
+      if (type === 'VISIT') {
+        title.innerText = 'Schedule In-Person Site Walkthrough';
+        submitBtn.innerText = 'Confirm Tour & Send WhatsApp Pass';
+        assetField.classList.add('hidden');
+      } else {
+        title.innerText = 'Create Direct Space Reservation';
+        submitBtn.innerText = 'Place Hold & Send WhatsApp Payment Link';
+        assetField.classList.remove('hidden');
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeActionModal() {
+      document.getElementById('actionModal').classList.add('hidden');
+    }
+
+    // Submit Action Form
+    async function submitActionForm(e) {
+      e.preventDefault();
+      const name = document.getElementById('modalCustomerName').value;
+      const phone = document.getElementById('modalCustomerPhone').value;
+      const locationCode = document.getElementById('modalLocation').value;
+      const assetCode = document.getElementById('modalAsset').value;
+      const date = document.getElementById('modalDate').value;
+      const timeSlot = document.getElementById('modalTimeSlot').value;
+      const notes = document.getElementById('modalNotes').value;
+
+      closeActionModal();
+
+      try {
+        if (activeActionType === 'VISIT') {
+          await fetch(`/api/v1/organizations/${currentOrg}/visits/book`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              locationCode,
+              phone,
+              name,
+              date,
+              timeSlot,
+              notes,
+            }),
+          });
+        } else {
+          await fetch(`/api/v1/organizations/${currentOrg}/bookings/hold`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              locationCode,
+              assetCode,
+              date,
+              startTime: timeSlot,
+              durationHours: 2,
+              paxCount: 4,
+              phone,
+              name,
+            }),
+          });
+        }
+        await loadDashboard();
+      } catch (err) {
+        console.error('Failed to submit action:', err);
+      }
+    }
+
+    // SSE Connection for Live Operations
     function initSse() {
       if (sseSource) sseSource.close();
       sseSource = new EventSource(`/api/v1/events/stream?organization=${currentOrg}`);
 
       sseSource.addEventListener('call:state', (e) => {
-        const call = JSON.parse(e.data);
-        const card = document.getElementById('liveCallCard');
-        card.classList.remove('hidden');
-        document.getElementById('liveCallerPhone').innerText = call.callerPhone;
-        document.getElementById('liveCallerName').innerText = call.callerName || 'Prospective Member';
-        document.getElementById('liveCallSummary').innerText = call.summary || 'Processing conversation in real time...';
-        document.getElementById('liveLeadScoreBadge').innerText = `SCORE: ${call.leadScore || 65} PTS`;
-        loadDashboard();
+        try {
+          const call = JSON.parse(e.data);
+          const card = document.getElementById('liveCallCard');
+          card.classList.remove('hidden');
+          document.getElementById('liveCallerPhone').innerText = call.callerPhone || '';
+          document.getElementById('liveCallerName').innerText = call.callerName || 'Prospective Member';
+          document.getElementById('liveCallSummary').innerText = call.summary || 'Processing conversation...';
+          document.getElementById('liveLeadScoreBadge').innerText = `Priority Lead (${call.leadScore || 65} pts)`;
+          loadDashboard();
+        } catch(err){}
       });
 
       sseSource.addEventListener('visit:updated', () => loadDashboard());
@@ -499,67 +870,12 @@
       sseSource.addEventListener('lead:updated', () => loadDashboard());
     }
 
-    function switchOrganization(slug) {
-      currentOrg = slug;
-      initSse();
-      loadDashboard();
-    }
-
-    function openSimulationModal() {
-      document.getElementById('simulationModal').classList.remove('hidden');
-    }
-
-    function closeSimulationModal() {
-      document.getElementById('simulationModal').classList.add('hidden');
-    }
-
-    async function executeSimulation() {
-      const name = document.getElementById('simName').value;
-      const phone = document.getElementById('simPhone').value;
-      const centre = document.getElementById('simCentre').value;
-      const track = document.getElementById('simTrack').value;
-
-      closeSimulationModal();
-
-      if (track === 'VISIT') {
-        await fetch(`/api/v1/organizations/${currentOrg}/visits/book`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            locationCode: centre,
-            phone,
-            name,
-            date: '2026-11-28',
-            timeSlot: '2:30 PM',
-            notes: '4-person private cabin move-in Dec 1',
-          }),
-        });
-      } else {
-        await fetch(`/api/v1/organizations/${currentOrg}/bookings/hold`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            locationCode: centre,
-            assetCode: 'MTG',
-            date: '2026-11-28',
-            startTime: '11:00',
-            durationHours: 2,
-            paxCount: 6,
-            phone,
-            name,
-          }),
-        });
-      }
-
-      loadDashboard();
-    }
-
-    // Startup
+    // Initializer
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       initSse();
       loadDashboard();
-      setInterval(loadDashboard, 15000); // Polling safeguard
+      setInterval(loadDashboard, 10000); // Background refresh safety net
     });
   </script>
 </body>
