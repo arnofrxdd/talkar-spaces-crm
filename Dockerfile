@@ -1,41 +1,34 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache openssl python3 make g++
+# Install OpenSSL & wget for Prisma engine on Alpine Linux
+RUN apk add --no-cache openssl wget
 
+# Copy package descriptors
 COPY package*.json ./
-COPY tsconfig.json ./
 COPY prisma ./prisma/
 
-RUN npm install
+# Install dependencies
+RUN npm ci || npm install
 
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy source code and config
+COPY tsconfig.json ./
 COPY src ./src/
 COPY public ./public/
+COPY docker-entrypoint.sh ./
 
-RUN npm run prisma:generate
-RUN npm run build
-
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-RUN apk add --no-cache openssl
+RUN chmod +x ./docker-entrypoint.sh
 
 ENV NODE_ENV=production
 ENV PORT=7578
-
-COPY package*.json ./
-COPY prisma ./prisma/
-
-RUN npm install --omit=dev
-
-COPY --from=builder /app/dist ./dist/
-COPY --from=builder /app/src/ui ./src/ui/
-COPY --from=builder /app/public ./public/
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma/
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma/
+ENV HOST=0.0.0.0
+ENV DATABASE_URL="file:/app/data/spaces.db"
 
 EXPOSE 7578
 
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["npm", "start"]

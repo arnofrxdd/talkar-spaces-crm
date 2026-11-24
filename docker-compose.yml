@@ -1,20 +1,30 @@
-version: '3.8'
-
 services:
   talkar-spaces-crm:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: talkar-spaces-crm
-    restart: unless-stopped
+    restart: always
     ports:
-      - "7578:7578"
+      # Exposes to unique port 7578 (customizable via SPACES_PORT env var)
+      - "${SPACES_PORT:-7578}:7578"
     environment:
+      - NODE_ENV=production
       - PORT=7578
       - HOST=0.0.0.0
-      - NODE_ENV=production
-      - DATABASE_URL=file:/app/data/dev.db
       - DOMAIN=spaces.talkar.in
+      - DATABASE_URL=file:/app/data/spaces.db
     volumes:
-      - ./data:/app/data
+      # Persistent SQLite volume for zero data loss across container updates
+      - talkar_spaces_data:/app/data
       - ./public/brochures:/app/public/brochures
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7578/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  talkar_spaces_data:
+    name: talkar_spaces_storage

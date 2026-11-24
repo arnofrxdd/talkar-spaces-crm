@@ -1,0 +1,100 @@
+{
+  "name": "Universal Spaces - Site Visit & Booking Confirmation (WhatsApp)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-spaces-visit-confirmed",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-visit-trigger",
+      "name": "Webhook - Visit Confirmation",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\n\nfunction sanitizePhone(raw) {\n  if (!raw) return '';\n  let s = String(raw).trim();\n  const match = s.match(/(?:(?:\\+|00)?\\d{1,4}[-.\\s]?)?(?:\\(?\\d{2,5}\\)?[-.\\s]?)?\\d{3,5}[-.\\s]?\\d{3,5}/);\n  if (match) s = match[0];\n  let digits = s.replace(/\\D/g, '');\n  if (digits.startsWith('00')) digits = digits.slice(2);\n  if (digits.length === 11 && digits.startsWith('0')) digits = '91' + digits.slice(1);\n  if (/^9191\\d{10}$/.test(digits)) digits = '91' + digits.slice(4);\n  if (digits.length === 10 && /^[6-9]/.test(digits)) digits = '91' + digits;\n  return digits;\n}\n\nconst rawPhone = body.phone_number || body.phone || body.lead_phone || '';\nconst phone = sanitizePhone(rawPhone);\nconst customerName = String(body.customer_name || body.callerName || body.name || 'Valued Guest').trim();\nconst companyName = String(body.company_name || 'Elite Co-Works').trim();\nconst visitRef = String(body.visitReference || body.booking_ref || body.reference || 'VISIT-' + Date.now().toString(36).toUpperCase()).trim();\nconst slotDate = String(body.slot_date || body.visitDate || body.date || '').trim();\nconst slotTime = String(body.slot_time || body.timeSlot || body.time || '').trim();\nconst locationName = String(body.locationName || 'BTM Layout 1st Stage').trim();\nconst hostName = String(body.hostName || 'Kavita Reddy (Centre Manager)').trim();\n\nconst isValid = phone.length >= 10 && phone.length <= 15 && Boolean(visitRef);\n\nconst payload = {\n  messaging_product: 'whatsapp',\n  to: phone,\n  type: 'template',\n  template: {\n    name: 'sales_appointment_confirmed',\n    language: { code: 'en' },\n    components: [\n      {\n        type: 'header',\n        parameters: [{ type: 'text', text: companyName }]\n      },\n      {\n        type: 'body',\n        parameters: [\n          { type: 'text', text: customerName },\n          { type: 'text', text: 'Site Tour / Walkthrough' },\n          { type: 'text', text: companyName },\n          { type: 'text', text: visitRef },\n          { type: 'text', text: slotDate },\n          { type: 'text', text: slotTime },\n          { type: 'text', text: `${locationName} — Host: ${hostName}` }\n        ]\n      }\n    ]\n  }\n};\n\nreturn [{\n  json: {\n    valid: isValid,\n    raw_phone: rawPhone,\n    phone_number: phone,\n    customer_name: customerName,\n    company_name: companyName,\n    visit_ref: visitRef,\n    slot_date: slotDate,\n    slot_time: slotTime,\n    payload: payload\n  }\n}];"
+      },
+      "id": "process-visit-payload",
+      "name": "Process Visit Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 100]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "leftValue": "={{ $json.valid }}",
+              "operator": { "type": "boolean", "operation": "true" },
+              "rightValue": true
+            }
+          ]
+        }
+      },
+      "id": "valid-check",
+      "name": "Valid Request?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [480, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v23.0/1314579088403220/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}"
+      },
+      "id": "http-meta-whatsapp",
+      "name": "Send WhatsApp via Meta Cloud API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 0],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "A4TlqRpKEb5a6CGY",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, message: \"WhatsApp pass dispatched\", reference: $json.visit_ref, phone: $json.phone_number }) }}"
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [940, 0]
+    }
+  ],
+  "connections": {
+    "Webhook - Visit Confirmation": {
+      "main": [[{ "node": "Process Visit Payload", "type": "main", "index": 0 }]]
+    },
+    "Process Visit Payload": {
+      "main": [[{ "node": "Valid Request?", "type": "main", "index": 0 }]]
+    },
+    "Valid Request?": {
+      "main": [
+        [{ "node": "Send WhatsApp via Meta Cloud API", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Send WhatsApp via Meta Cloud API": {
+      "main": [[{ "node": "Respond Success", "type": "main", "index": 0 }]]
+    }
+  }
+}
