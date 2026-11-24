@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talkar Spaces — Executive Operations & Live Visit Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surface: {
+              900: '#0B0D13',
+              800: '#121620',
+              700: '#1A202E',
+              600: '#232B3D',
+              border: '#2A344A',
+            },
+            accent: {
+              DEFAULT: '#3B82F6',
+              glow: '#60A5FA',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0B0D13;
+      color: #E2E8F0;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-font-smoothing: antialiased;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #121620;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #2A344A;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #3B82F6;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .pulse-live {
+      animation: pulse-subtle 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+
+  <!-- Top Executive Navigation Bar -->
+  <header class="border-b border-surface-border bg-surface-800/90 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Left: Brand & Tenant Selector -->
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-extrabold text-lg">
+            S
+          </div>
+          <div>
+            <div class="text-sm font-extrabold tracking-tight text-white flex items-center gap-1.5">
+              TALKAR <span class="text-blue-400 font-bold">SPACES</span>
+              <span class="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">Operations</span>
+            </div>
+            <div class="text-[11px] text-slate-400 font-medium">Universal Inbound & Tour Engine</div>
+          </div>
+        </div>
+
+        <div class="h-6 w-px bg-surface-border"></div>
+
+        <!-- Multi-Tenant Organization Switcher -->
+        <div class="relative">
+          <select id="orgSelector" onchange="switchOrganization(this.value)" class="bg-surface-700 border border-surface-border text-white text-xs font-semibold rounded-lg px-3 py-1.5 pr-8 focus:outline-none focus:border-blue-500 cursor-pointer">
+            <option value="elite-coworks">Elite Co-Works (Bengaluru)</option>
+            <option value="prestige-properties">Prestige Luxury Estates (Real Estate)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right: Live System Status & Fast Actions -->
+      <div class="flex items-center space-x-3">
+        <!-- Live Call Ticker Indicator -->
+        <div id="liveCallStatus" class="flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Voice Agent Online: Riya</span>
+        </div>
+
+        <!-- Location Filter -->
+        <select id="locationSelector" onchange="filterLocation(this.value)" class="bg-surface-700 border border-surface-border text-slate-300 text-xs font-medium rounded-lg px-3 py-1.5 focus:outline-none">
+          <option value="ALL">All Centres</option>
+          <option value="BTM">BTM Layout</option>
+          <option value="JPN">JP Nagar</option>
+          <option value="BNG">Bannerghatta</option>
+        </select>
+
+        <button onclick="openSimulationModal()" class="flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow-sm transition">
+          <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+          <span>Simulate Call</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Dashboard -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Active Call Live Pitch Ticker (Shows during live inbound call) -->
+    <div id="liveCallCard" class="hidden rounded-2xl bg-gradient-to-r from-blue-950/60 to-surface-800 border border-blue-500/30 p-4 shadow-xl transition-all">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+            <i data-lucide="phone" class="w-5 h-5 animate-bounce"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs uppercase font-extrabold tracking-wider px-2 py-0.5 rounded bg-blue-500 text-white font-mono">INBOUND CALL ACTIVE</span>
+              <span id="liveCallerPhone" class="text-sm font-bold text-white font-mono">+91 98450 XXXXX</span>
+              <span id="liveCallerName" class="text-xs text-slate-400">— Caller Speaking</span>
+            </div>
+            <div id="liveCallSummary" class="text-xs text-slate-300 mt-1">
+              "Customer inquiring for a 4-person lockable cabin in BTM Layout from 1st December..."
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span id="liveLeadScoreBadge" class="text-xs font-extrabold px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono">
+            SCORE: 65 PTS
+          </span>
+          <span class="text-xs font-extrabold px-2.5 py-1 rounded bg-rose-500/20 border border-rose-500/30 text-rose-300">
+            🔥 HOT PROSPECT
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive KPI Row -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Metric 1: Confirmed Slot Revenue -->
+      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+          <span>Instant Slot Revenue</span>
+          <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div class="mt-2 text-2xl font-extrabold text-white font-mono" id="kpiRevenue">₹0</div>
+        <div class="mt-1 flex items-center text-[11px] text-emerald-400 font-medium">
+          <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> Paid day passes & meeting rooms
+        </div>
+      </div>
+
+      <!-- Metric 2: Scheduled Tours -->
+      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+          <span id="kpiTourLabel">Site Tours Booked</span>
+          <i data-lucide="calendar-check-2" class="w-4 h-4 text-blue-400"></i>
+        </div>
+        <div class="mt-2 text-2xl font-extrabold text-white font-mono" id="kpiTours">0</div>
+        <div class="mt-1 flex items-center text-[11px] text-blue-400 font-medium">
+          <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> Locked on centre calendars
+        </div>
+      </div>
+
+      <!-- Metric 3: Hot Leads (SLA < 15 Min) -->
+      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+          <span>High-Priority Inquiries</span>
+          <i data-lucide="flame" class="w-4 h-4 text-rose-400"></i>
+        </div>
+        <div class="mt-2 text-2xl font-extrabold text-rose-400 font-mono" id="kpiHotLeads">0</div>
+        <div class="mt-1 flex items-center text-[11px] text-rose-300 font-medium">
+          <i data-lucide="clock" class="w-3 h-3 mr-1"></i> Follow-up SLA: &lt; 15 mins
+        </div>
+      </div>
+
+      <!-- Metric 4: Total Inbound Leads -->
+      <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+          <span>Total Inbound Pipeline</span>
+          <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i>
+        </div>
+        <div class="mt-2 text-2xl font-extrabold text-white font-mono" id="kpiTotalLeads">0</div>
+        <div class="mt-1 flex items-center text-[11px] text-slate-400 font-medium">
+          <i data-lucide="bot" class="w-3 h-3 mr-1"></i> Qualified 24x7 by Voice AI
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Dual-Track Operational Board -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- Column 1: Track 2 — High-Ticket Site Visits & Tours -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+            <h2 class="text-sm font-extrabold text-white tracking-wide uppercase font-mono">
+              Track 2: In-Person Site Tours
+            </h2>
+          </div>
+          <span class="text-xs text-slate-400 font-medium" id="visitCountLabel">0 Tours</span>
+        </div>
+
+        <div id="siteVisitsFeed" class="space-y-3 custom-scrollbar max-h-[600px] overflow-y-auto pr-1">
+          <!-- Site visits rendered dynamically -->
+          <div class="text-center py-12 text-slate-500 text-xs">Loading tours...</div>
+        </div>
+      </div>
+
+      <!-- Column 2: Track 1 — Instant Slot Holds & Day Passes -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+            <h2 class="text-sm font-extrabold text-white tracking-wide uppercase font-mono">
+              Track 1: Instant Slot Holds & Passes
+            </h2>
+          </div>
+          <span class="text-xs text-slate-400 font-medium" id="bookingCountLabel">0 Bookings</span>
+        </div>
+
+        <div id="bookingsFeed" class="space-y-3 custom-scrollbar max-h-[600px] overflow-y-auto pr-1">
+          <!-- Bookings rendered dynamically -->
+          <div class="text-center py-12 text-slate-500 text-xs">Loading bookings...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Live Inquiries Table -->
+    <section class="rounded-xl bg-surface-800 border border-surface-border overflow-hidden">
+      <div class="p-4 border-b border-surface-border flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="layers" class="w-4 h-4 text-blue-400"></i>
+          <h3 class="text-sm font-bold text-white">Inbound Lead Pipeline & Qualification Records</h3>
+        </div>
+        <span class="text-xs text-slate-400">Automated CRM sync with progressive slot filling</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-surface-border bg-surface-700/50 text-slate-400 uppercase font-mono text-[10px] tracking-wider">
+              <th class="py-3 px-4">Contact</th>
+              <th class="py-3 px-4">Intent</th>
+              <th class="py-3 px-4">Requirement / Slots</th>
+              <th class="py-3 px-4">Score & Priority</th>
+              <th class="py-3 px-4">Assigned Owner</th>
+              <th class="py-3 px-4">Stage</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody" class="divide-y divide-surface-border text-slate-300">
+            <tr>
+              <td colspan="7" class="py-8 text-center text-slate-500">Loading pipeline...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Simulation Modal -->
+  <div id="simulationModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-surface-800 border border-surface-border w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-surface-border pb-3">
+        <div class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="phone-outgoing" class="w-4 h-4 text-blue-400"></i>
+          Simulate Inbound Voice Call
+        </div>
+        <button onclick="closeSimulationModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1 font-medium">Caller Name</label>
+          <input type="text" id="simName" value="Rahul Sharma" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1 font-medium">Phone Number (E.164)</label>
+          <input type="text" id="simPhone" value="+919845099887" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1 font-medium">Target Centre</label>
+          <select id="simCentre" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+            <option value="BTM">BTM Layout 1st Stage</option>
+            <option value="JPN">JP Nagar 6th Phase</option>
+            <option value="BNG">Bannerghatta Road</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1 font-medium">Inquiry Type</label>
+          <select id="simTrack" class="w-full bg-surface-700 border border-surface-border rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+            <option value="VISIT">Track 2: Private Cabin (4 Seats) — Book Site Tour</option>
+            <option value="HOLD">Track 1: Meeting Room (2 Hours) — Instant 15m Hold</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-surface-border">
+        <button onclick="closeSimulationModal()" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white text-xs">Cancel</button>
+        <button onclick="executeSimulation()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition">
+          Trigger Call & Watch Board
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Client Application -->
+  <script>
+    let currentOrg = 'elite-coworks';
+    let currentLocation = 'ALL';
+    let sseSource = null;
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch(`/api/v1/organizations/${currentOrg}/dashboard`);
+        const json = await res.json();
+        if (!json.success) return;
+        renderDashboard(json.data);
+      } catch (err) {
+        console.error('Failed to load dashboard:', err);
+      }
+    }
+
+    function renderDashboard(data) {
+      // 1. Render KPIs
+      document.getElementById('kpiRevenue').innerText = `₹${(data.kpis.totalRevenueReserved || 0).toLocaleString('en-IN')}`;
+      document.getElementById('kpiTours').innerText = data.kpis.totalToursBooked || 0;
+      document.getElementById('kpiHotLeads').innerText = data.kpis.hotLeadsCount || 0;
+      document.getElementById('kpiTotalLeads').innerText = data.kpis.totalInquiries || 0;
+
+      // 2. Render Tours (Track 2)
+      const toursContainer = document.getElementById('siteVisitsFeed');
+      document.getElementById('visitCountLabel').innerText = `${data.siteVisits.length} Tours`;
+
+      if (data.siteVisits.length === 0) {
+        toursContainer.innerHTML = `<div class="text-center py-12 text-slate-500 text-xs bg-surface-800/40 rounded-xl border border-surface-border">No site tours booked yet. Call the agent to schedule one!</div>`;
+      } else {
+        toursContainer.innerHTML = data.siteVisits.map(v => `
+          <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm hover:border-blue-500/50 transition">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="font-bold text-white text-sm">${v.lead?.name || 'Inbound Visitor'}</span>
+                  <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">${v.reference}</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                  <i data-lucide="map-pin" class="w-3 h-3 text-slate-500"></i> ${v.location?.name || 'Centre'}
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono ${v.status === 'SCHEDULED' ? 'bg-blue-500/20 text-blue-300' : 'bg-emerald-500/20 text-emerald-300'}">
+                ${v.status}
+              </span>
+            </div>
+
+            <div class="mt-3 pt-3 border-t border-surface-border flex items-center justify-between text-xs">
+              <div class="flex items-center text-slate-300 gap-1.5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
+                <span class="font-medium">${v.visitDate} @ ${v.timeSlot}</span>
+              </div>
+              <div class="text-[11px] text-slate-400">
+                Host: <span class="text-slate-200 font-medium">${v.assignedHostName || 'Centre Advisor'}</span>
+              </div>
+            </div>
+
+            <div class="mt-2 text-[11px] text-emerald-400 flex items-center justify-between">
+              <span class="flex items-center gap-1"><i data-lucide="message-square" class="w-3 h-3"></i> WhatsApp Pass Dispatched</span>
+              <span class="font-mono text-slate-500">${v.lead?.phone || ''}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 3. Render Bookings (Track 1)
+      const bookingsContainer = document.getElementById('bookingsFeed');
+      document.getElementById('bookingCountLabel').innerText = `${data.bookings.length} Bookings`;
+
+      if (data.bookings.length === 0) {
+        bookingsContainer.innerHTML = `<div class="text-center py-12 text-slate-500 text-xs bg-surface-800/40 rounded-xl border border-surface-border">No slot holds or bookings active.</div>`;
+      } else {
+        bookingsContainer.innerHTML = data.bookings.map(b => `
+          <div class="rounded-xl bg-surface-800 border border-surface-border p-4 shadow-sm hover:border-emerald-500/50 transition">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="font-bold text-white text-sm">${b.asset?.name || 'Workspace Slot'}</span>
+                  <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${b.bookingReference}</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5">
+                  Guest: <span class="text-slate-200 font-medium">${b.lead?.name || 'Valued Member'}</span> (${b.paxCount} Pax)
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-mono text-sm font-extrabold text-white">₹${b.totalAmount.toLocaleString('en-IN')}</div>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${b.paymentStatus === 'PAID' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                  ${b.paymentStatus === 'HELD' ? '15m Temporary Hold' : 'Paid Confirmed'}
+                </span>
+              </div>
+            </div>
+
+            <div class="mt-3 pt-3 border-t border-surface-border flex items-center justify-between text-xs text-slate-400">
+              <div>${b.bookingDate} (${b.durationHours} hrs)</div>
+              <div class="text-[11px] text-blue-400 flex items-center gap-1">
+                <i data-lucide="send" class="w-3 h-3"></i> Payment Link Sent via WhatsApp
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 4. Render Leads Table
+      const leadsTable = document.getElementById('leadsTableBody');
+      leadsTable.innerHTML = data.leads.map(lead => {
+        const custom = JSON.parse(lead.customFields || '{}');
+        const customSummary = Object.entries(custom)
+          .map(([k, v]) => `<span class="px-1.5 py-0.5 rounded bg-surface-700 text-slate-300 font-mono text-[10px]">${k}: ${v}</span>`)
+          .join(' ');
+
+        return `
+          <tr class="hover:bg-surface-700/30 transition">
+            <td class="py-3 px-4">
+              <div class="font-bold text-white">${lead.name || 'Anonymous Caller'}</div>
+              <div class="font-mono text-[11px] text-slate-400">${lead.phone}</div>
+            </td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded bg-surface-700 text-slate-300 font-mono text-[11px]">${lead.intent || 'ENQ_DESK'}</span>
+            </td>
+            <td class="py-3 px-4 max-w-xs">
+              <div class="flex flex-wrap gap-1">${customSummary || '<span class="text-slate-500">No extra slots</span>'}</div>
+              ${lead.summary ? `<div class="text-[11px] text-slate-400 mt-1 truncate">${lead.summary}</div>` : ''}
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex items-center space-x-1.5">
+                <span class="font-mono font-extrabold text-xs ${lead.leadScore >= 60 ? 'text-rose-400' : lead.leadScore >= 30 ? 'text-amber-400' : 'text-slate-400'}">
+                  ${lead.leadScore} PTS
+                </span>
+                <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${lead.temperature === 'HOT' ? 'bg-rose-500/20 text-rose-300' : lead.temperature === 'WARM' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-700 text-slate-400'}">
+                  ${lead.temperature}
+                </span>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-slate-300">${lead.ownerName || 'Automated Nurture'}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">${lead.stage}</span>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="alert('Viewing verified lead notes for ' + '${lead.name}')" class="text-blue-400 hover:text-blue-300 font-medium text-xs">View Log</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // Connect SSE Live Stream
+    function initSse() {
+      if (sseSource) sseSource.close();
+      sseSource = new EventSource(`/api/v1/events/stream?organization=${currentOrg}`);
+
+      sseSource.addEventListener('call:state', (e) => {
+        const call = JSON.parse(e.data);
+        const card = document.getElementById('liveCallCard');
+        card.classList.remove('hidden');
+        document.getElementById('liveCallerPhone').innerText = call.callerPhone;
+        document.getElementById('liveCallerName').innerText = call.callerName || 'Prospective Member';
+        document.getElementById('liveCallSummary').innerText = call.summary || 'Processing conversation in real time...';
+        document.getElementById('liveLeadScoreBadge').innerText = `SCORE: ${call.leadScore || 65} PTS`;
+        loadDashboard();
+      });
+
+      sseSource.addEventListener('visit:updated', () => loadDashboard());
+      sseSource.addEventListener('booking:updated', () => loadDashboard());
+      sseSource.addEventListener('lead:updated', () => loadDashboard());
+    }
+
+    function switchOrganization(slug) {
+      currentOrg = slug;
+      initSse();
+      loadDashboard();
+    }
+
+    function openSimulationModal() {
+      document.getElementById('simulationModal').classList.remove('hidden');
+    }
+
+    function closeSimulationModal() {
+      document.getElementById('simulationModal').classList.add('hidden');
+    }
+
+    async function executeSimulation() {
+      const name = document.getElementById('simName').value;
+      const phone = document.getElementById('simPhone').value;
+      const centre = document.getElementById('simCentre').value;
+      const track = document.getElementById('simTrack').value;
+
+      closeSimulationModal();
+
+      if (track === 'VISIT') {
+        await fetch(`/api/v1/organizations/${currentOrg}/visits/book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            locationCode: centre,
+            phone,
+            name,
+            date: '2026-11-28',
+            timeSlot: '2:30 PM',
+            notes: '4-person private cabin move-in Dec 1',
+          }),
+        });
+      } else {
+        await fetch(`/api/v1/organizations/${currentOrg}/bookings/hold`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            locationCode: centre,
+            assetCode: 'MTG',
+            date: '2026-11-28',
+            startTime: '11:00',
+            durationHours: 2,
+            paxCount: 6,
+            phone,
+            name,
+          }),
+        });
+      }
+
+      loadDashboard();
+    }
+
+    // Startup
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initSse();
+      loadDashboard();
+      setInterval(loadDashboard, 15000); // Polling safeguard
+    });
+  </script>
+</body>
+</html>

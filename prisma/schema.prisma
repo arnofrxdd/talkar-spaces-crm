@@ -1,0 +1,265 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------------------------------------------------------------------------
+// 1. Organization (Tenant: e.g. "elite-coworks", "prestige-properties", "clove-health")
+// ---------------------------------------------------------------------------
+model Organization {
+  id                  String       @id @default(uuid())
+  slug                String       @unique // e.g. "elite-coworks", "prestige-properties", "clove-health"
+  name                String       // e.g. "Elite Co-Works Bengaluru"
+  brand               String?
+  industry            String       @default("COWORKING") // "COWORKING", "REAL_ESTATE", "BANQUET_VENUE", "CLINIC", "AUTO_DEALERSHIP", "SPORTS_TURF"
+  tagline             String?
+  description         String?
+
+  phone               String?      // Primary inbound sales number
+  email               String?
+  website             String?
+  currency            String       @default("INR") // INR, USD, EUR
+  timezone            String       @default("Asia/Kolkata")
+
+  // Dynamic Terminology Nouns (Adapt UI and Agent Prompts dynamically)
+  locationNoun        String       @default("Centre")        // e.g. "Centre", "Project Site", "Branch", "Showroom"
+  assetNoun           String       @default("Workspace")     // e.g. "Desk / Cabin", "Apartment Unit", "Hall", "Vehicle"
+  visitNoun           String       @default("Site Visit")    // e.g. "Site Visit", "Venue Recce", "Doctor OPD", "Home Test Drive"
+  visitCodePrefix     String       @default("VISIT")         // e.g. "VISIT-", "DRIVE-", "OPD-"
+
+  // Dynamic Vertical Configuration (JSON strings for zero-friction schema)
+  pipelineStages      String       @default("[\"NEW\",\"QUALIFIED\",\"VISIT_BOOKED\",\"VISITED\",\"PROPOSAL\",\"WON\",\"LOST\"]")
+  scoringRules        String       @default("[]")            // Array of scoring conditions and points
+  customFieldsSchema  String       @default("{}")            // JSON Schema defining extra qualification slots
+
+  locations           Location[]
+  assets              Asset[]
+  leads               Lead[]
+  bookings            Booking[]
+  siteVisits          SiteVisit[]
+  auditLogs           AuditLog[]
+
+  isActive            Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([slug])
+}
+
+// ---------------------------------------------------------------------------
+// 2. Location / Property / Branch (e.g. BTM Layout, JP Nagar, Whitefield)
+// ---------------------------------------------------------------------------
+model Location {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  code                String       // e.g. "BTM", "JPN", "BNG", "WHITEFIELD"
+  name                String       // e.g. "BTM Layout 1st Stage"
+  address             String       // e.g. "5a, 1A Cross Rd, Dollar Scheme Colony, BTM 1st Stage"
+  city                String       @default("Bengaluru")
+  state               String?      @default("Karnataka")
+  postalCode          String?      @default("560068")
+  mapCoordinates      String?      // e.g. "12.9165,77.6101"
+  googleMapsUrl       String?      // Dispatched via WhatsApp location pin
+
+  operatingHours      String       @default("Monday-Saturday 9:00 AM - 8:00 PM")
+  managerName         String?      // Contact person for in-person site visits
+  managerPhone        String?      // Host phone notified on visit booking
+  managerEmail        String?
+
+  amenities           String       @default("[\"High-Speed WiFi\",\"Central AC\",\"Power Backup\",\"Pantry & Beverages\",\"Biometric Access\"]")
+  photos              String       @default("[]") // JSON Array of image URLs
+
+  assets              Asset[]
+  bookings            Booking[]
+  siteVisits          SiteVisit[]
+
+  isActive            Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+// ---------------------------------------------------------------------------
+// 3. Asset / Offering / Space (e.g. Day Pass, Meeting Room, Private Cabin)
+// ---------------------------------------------------------------------------
+model Asset {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  locationId          String?
+  location            Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  code                String       // e.g. "DAY", "MTG", "CONF", "FLEXI", "FIXED", "CABIN", "ENT", "VO"
+  name                String       // e.g. "Meeting Room (6 Pax)", "Private Cabin (4 Seats)"
+  category            String       // "SHORT_TERM" (Instant Checkout) or "LONG_TERM" (Visit-to-Close)
+  description         String?
+
+  pricingUnit         String       // "per day", "per hour", "per seat / month", "per month"
+  startingPrice       Float        // e.g. 350.0, 600.0, 7000.0
+  capacityPax         Int          @default(1)
+  totalInventory      Int          @default(1)
+
+  bookingMode         String       @default("SITE_VISIT") // "INSTANT_PAY", "SITE_VISIT", "SALES_HANDOFF"
+  amenities           String       @default("[]") // Specific features (e.g. "LED Display", "Whiteboard")
+  photos              String       @default("[]")
+  brochurePdfUrl      String?
+
+  bookings            Booking[]
+  isActive            Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@unique([organizationId, code])
+  @@index([organizationId, category])
+}
+
+// ---------------------------------------------------------------------------
+// 4. Lead / Prospect (Universal Pipeline + JSON Custom Fields)
+// ---------------------------------------------------------------------------
+model Lead {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Primary Identity
+  phone               String       // E.164 Caller Phone
+  name                String?
+  email               String?
+  companyName         String?
+
+  // Pipeline State
+  stage               String       @default("NEW")  // "NEW", "QUALIFIED", "VISIT_BOOKED", "VISITED", "PROPOSAL", "WON", "LOST"
+  temperature         String       @default("WARM") // "HOT", "WARM", "COLD"
+  leadScore           Int          @default(0)      // Computed 0-100 score
+  ownerName           String?      // e.g. "Senior Sales / Centre Manager"
+  firstTouchSla       DateTime?    // Max deadline for human callback (15 min for Hot)
+
+  // Call Intelligence & Telephony
+  intent              String?      // e.g. "BOOK_SHORT", "ENQ_DESK", "ENQ_CABIN", "ENQ_VO", "ENQ_ENT"
+  source              String       @default("VOICE_AI") // "VOICE_AI", "WHATSAPP", "WEB_FORM", "ADS"
+  callRunId           String?
+  audioUrl            String?
+  transcript          String?
+  summary             String?      // <= 60 words AI generated summary
+  disclosedAi         Boolean      @default(true)
+  recordingConsent    Boolean      @default(true)
+
+  // 20% Dynamic Metadata (JSON for any industry-specific slot)
+  // For Coworking: {"seats": 4, "moveInDate": "2026-12-01", "tenureMonths": 6, "centre": "BTM Layout"}
+  // For Real Estate: {"bhk": "3BHK", "budget": "1.5 Cr", "possession": "Dec 2026"}
+  // For Clinic: {"doctor": "Dr. Sharma", "symptom": "Tooth pain", "procedure": "Root Canal"}
+  customFields        String       @default("{}")
+
+  callbackAt          DateTime?
+  callbackReason      String?
+
+  bookings            Booking[]
+  siteVisits          SiteVisit[]
+  auditLogs           AuditLog[]
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([organizationId, phone])
+  @@index([organizationId, stage])
+  @@index([leadScore])
+}
+
+// ---------------------------------------------------------------------------
+// 5. Short-Term Slot Booking (Track 1: Day Pass, Meeting Rooms, Instant Pay)
+// ---------------------------------------------------------------------------
+model Booking {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  locationId          String
+  location            Location     @relation(fields: [locationId], references: [id])
+  assetId             String
+  asset               Asset        @relation(fields: [assetId], references: [id])
+  leadId              String?
+  lead                Lead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  bookingReference    String       @unique // e.g. "BKG-8021"
+  bookingDate         String       // YYYY-MM-DD
+  startTime           String?      // "10:00"
+  durationHours       Float?       @default(1.0)
+  paxCount            Int          @default(1)
+
+  // Payment State Machine
+  subtotal            Float
+  taxAmount           Float        @default(0.0)
+  totalAmount         Float
+  currency            String       @default("INR")
+  paymentStatus       String       @default("HELD") // "HELD", "PAID", "FAILED", "EXPIRED", "REFUNDED"
+  holdExpiresAt       DateTime?    // 15-minute slot release timer
+  paymentLinkUrl      String?
+  paymentGatewayRef   String?      // Razorpay / Cashfree Order ID
+
+  status              String       @default("HELD") // "HELD", "CONFIRMED", "CANCELLED", "COMPLETED"
+  source              String       @default("VOICE_AI")
+  callRunId           String?
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([organizationId, bookingDate])
+  @@index([bookingReference])
+}
+
+// ---------------------------------------------------------------------------
+// 6. Site Visit / Tour / Appointment (Track 2: High-Ticket Closer Pipeline)
+// ---------------------------------------------------------------------------
+model SiteVisit {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  locationId          String
+  location            Location     @relation(fields: [locationId], references: [id])
+  leadId              String
+  lead                Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  reference           String       @unique // e.g. "VISIT-4091", "OPD-3184", "DRIVE-9912"
+  visitDate           String       // YYYY-MM-DD
+  timeSlot            String       // e.g. "11:30 AM", "3:00 PM"
+  status              String       @default("SCHEDULED") // "SCHEDULED", "ATTENDED", "RESCHEDULED", "CANCELLED", "NO_SHOW"
+
+  assignedHostName    String?      // Centre Manager / Relationship Closer
+  assignedHostPhone   String?
+  googleCalendarEventId String?
+
+  notes               String?
+  callRunId           String?
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([organizationId, visitDate])
+  @@index([reference])
+}
+
+// ---------------------------------------------------------------------------
+// 7. Audit Log & Lifecycle Event Stream
+// ---------------------------------------------------------------------------
+model AuditLog {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId              String?
+  lead                Lead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  eventType           String       // e.g. "CALL_STARTED", "SLOT_HELD", "PAYMENT_LINK_SENT", "VISIT_BOOKED", "WHATSAPP_DISPATCHED"
+  payload             String       // JSON payload
+  performedBy         String       @default("VOICE_AGENT")
+
+  createdAt           DateTime     @default(now())
+
+  @@index([organizationId, eventType])
+}
