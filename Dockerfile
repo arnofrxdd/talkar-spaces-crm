@@ -18,6 +18,7 @@ RUN npx prisma generate
 # Copy source code and config
 COPY tsconfig.json ./
 COPY src ./src/
+RUN mkdir -p ./public/brochures ./public/photos
 COPY public ./public/
 COPY docker-entrypoint.sh ./
 
