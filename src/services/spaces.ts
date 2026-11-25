@@ -138,6 +138,7 @@ class SpacesService {
         bookingMode: asset.bookingMode,
         description: asset.description,
         amenities: JSON.parse(asset.amenities || '[]'),
+        photos: JSON.parse(asset.photos || '[]'),
         brochurePdfUrl: asset.brochurePdfUrl,
       })),
     };
@@ -202,6 +203,7 @@ class SpacesService {
         currency: org.currency,
         pricingUnit: asset.pricingUnit,
       },
+      photos: JSON.parse(asset.photos || '[]'),
       paxMax: asset.capacityPax,
       operatingHours: location.operatingHours,
     };
@@ -264,7 +266,8 @@ class SpacesService {
     const bookingReference = `BKG-${refNumber}`;
 
     const holdExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes hold
-    const paymentLinkUrl = `https://rzp.io/l/demo-${bookingReference.toLowerCase()}`;
+    const baseUrl = process.env.BASE_URL || (process.env.DOMAIN ? `https://${process.env.DOMAIN}` : 'https://spaces.talkar.in');
+    const paymentLinkUrl = `${baseUrl}/pay/${bookingReference}`;
 
     const booking = await prisma.booking.create({
       data: {
@@ -715,6 +718,58 @@ class SpacesService {
       leads: org.leads,
       bookings: org.bookings,
       siteVisits: org.siteVisits,
+    };
+  }
+
+  /**
+   * Send Asset Photos via n8n WhatsApp Webhook
+   */
+  async sendAssetPhoto(params: {
+    organizationSlug: string;
+    phone: string;
+    assetCodeOrName: string;
+    customerName?: string;
+  }) {
+    const { organizationSlug, phone, assetCodeOrName, customerName } = params;
+
+    const org = await prisma.organization.findUnique({
+      where: { slug: organizationSlug },
+      include: { assets: true, locations: true },
+    });
+    if (!org) throw new Error(`Organization '${organizationSlug}' not found.`);
+
+    const query = (assetCodeOrName || 'MTG').trim().toLowerCase();
+    const asset =
+      org.assets.find(
+        (a) =>
+          a.code.toLowerCase() === query ||
+          a.name.toLowerCase().includes(query) ||
+          query.includes(a.code.toLowerCase())
+      ) || org.assets[0];
+
+    const photos = JSON.parse(asset.photos || '[]');
+    const primaryPhoto =
+      photos[0] || 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200';
+    const location = org.locations[0];
+
+    const webhookUrl = process.env.N8N_WEBHOOK_PHOTO || 'https://n8n.talkar.in/webhook/send-spaces-photo';
+    await this.dispatchWebhook(webhookUrl, {
+      phone,
+      customerName: customerName || 'Valued Guest',
+      organizationName: org.name,
+      assetName: asset.name,
+      locationName: location?.name || org.name,
+      photoUrl: primaryPhoto,
+      amenities: asset.amenities ? JSON.parse(asset.amenities).join(', ') : 'High-speed WiFi, AC, Display',
+    });
+
+    return {
+      success: true,
+      assetCode: asset.code,
+      assetName: asset.name,
+      locationName: location?.name,
+      photoUrl: primaryPhoto,
+      phone,
     };
   }
 }

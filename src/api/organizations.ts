@@ -77,7 +77,32 @@ organizationsRouter.post('/', async (req: Request, res: Response) => {
   }
 });
 
-// 6. Delete organization by slug
+// 6. Send Asset / Room Photos via WhatsApp
+organizationsRouter.post('/:slug/send-photo', async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const { phone, recipient_phone, assetCode, assetName, asset, room_type, customerName, name } = req.body;
+    const targetPhone = phone || recipient_phone;
+    const targetAsset = assetCode || assetName || asset || room_type || 'MTG';
+
+    if (!targetPhone) {
+      return res.status(400).json({ success: false, error: 'phone or recipient_phone is required' });
+    }
+
+    const result = await spacesService.sendAssetPhoto({
+      organizationSlug: slug,
+      phone: String(targetPhone),
+      assetCodeOrName: String(targetAsset),
+      customerName: customerName || name,
+    });
+
+    res.json({ success: true, message: `Photos dispatched to ${targetPhone}`, data: result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 7. Delete organization by slug
 organizationsRouter.delete('/:slug', async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;

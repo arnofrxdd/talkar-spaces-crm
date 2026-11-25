@@ -122,6 +122,11 @@ async function main() {
       capacityPax: 1,
       totalInventory: 30,
       bookingMode: 'INSTANT_PAY',
+      photos: [
+        'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['High-speed 500 Mbps WiFi', 'Air Conditioning', 'Unlimited Tea, Coffee & Infusions', 'Pantry Access'],
     },
     {
       code: 'MTG',
@@ -133,6 +138,11 @@ async function main() {
       capacityPax: 6,
       totalInventory: 4,
       bookingMode: 'INSTANT_PAY',
+      photos: [
+        'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['4K HDMI Display Screen', 'Magnetic Glass Whiteboard', 'Polycom Conference Speaker', 'Ergonomic Executive Mesh Chairs'],
     },
     {
       code: 'CONF',
@@ -144,6 +154,11 @@ async function main() {
       capacityPax: 14,
       totalInventory: 2,
       bookingMode: 'INSTANT_PAY',
+      photos: [
+        'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['65-inch 4K Video Conference Screen', 'Ceiling Microphone Array', 'Leather High-Back Chairs', 'Dedicated Beverage Service'],
     },
     {
       code: 'VO',
@@ -155,6 +170,10 @@ async function main() {
       capacityPax: 1,
       totalInventory: 100,
       bookingMode: 'SALES_HANDOFF',
+      photos: [
+        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['Prime Commercial Mailing Address', 'GST Registration NOC & Utility Bill', 'Courier & Package Handling', '10 Hrs Monthly Meeting Room Access'],
     },
     {
       code: 'FLEXI',
@@ -166,6 +185,11 @@ async function main() {
       capacityPax: 1,
       totalInventory: 25,
       bookingMode: 'SITE_VISIT',
+      photos: [
+        'https://images.unsplash.com/photo-1504384764586-bb4cdc1707b0?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['Unreserved Open-Plan Seat', '24/7 Biometric Access', 'High-Speed Fiber WiFi', 'Unlimited Beverage Bar'],
     },
     {
       code: 'FIXED',
@@ -177,6 +201,11 @@ async function main() {
       capacityPax: 1,
       totalInventory: 20,
       bookingMode: 'SITE_VISIT',
+      photos: [
+        'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['Dedicated Personal Desk', 'Lockable 3-Tier Storage Pedestal', 'Herman Miller Style Ergonomic Chair', 'Power Strip & LAN Port'],
     },
     {
       code: 'CABIN',
@@ -188,6 +217,11 @@ async function main() {
       capacityPax: 8,
       totalInventory: 6,
       bookingMode: 'SITE_VISIT',
+      photos: [
+        'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['Acoustic Sound-Dampened Walls', 'Dedicated Biometric Access Door', 'Company Frosted Glass Branding', 'Private Router & Subnet'],
     },
     {
       code: 'ENT',
@@ -199,13 +233,29 @@ async function main() {
       capacityPax: 50,
       totalInventory: 2,
       bookingMode: 'SALES_HANDOFF',
+      photos: [
+        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200',
+        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200',
+      ],
+      amenities: ['Entire Managed Wing / Half Floor', 'Dedicated Meeting Room & Phone Booths', 'Private Manager Cabin & Server Rack', 'Custom Wall & Reception Branding'],
     },
   ];
 
   for (const a of assets) {
     await prisma.asset.upsert({
       where: { organizationId_code: { organizationId: eliteCoworks.id, code: a.code } },
-      update: {},
+      update: {
+        name: a.name,
+        category: a.category,
+        description: a.description,
+        startingPrice: a.startingPrice,
+        pricingUnit: a.pricingUnit,
+        capacityPax: a.capacityPax,
+        totalInventory: a.totalInventory,
+        bookingMode: a.bookingMode,
+        photos: JSON.stringify(a.photos),
+        amenities: JSON.stringify(a.amenities),
+      },
       create: {
         organizationId: eliteCoworks.id,
         locationId: btm.id,
@@ -218,6 +268,8 @@ async function main() {
         capacityPax: a.capacityPax,
         totalInventory: a.totalInventory,
         bookingMode: a.bookingMode,
+        photos: JSON.stringify(a.photos),
+        amenities: JSON.stringify(a.amenities),
       },
     });
   }
