@@ -477,6 +477,31 @@
       loadDashboard();
     }
 
+    // Load dynamic organizations list for tenant switcher
+    async function loadOrganizations() {
+      try {
+        const res = await fetch('/api/v1/organizations');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const select = document.getElementById('orgSelector');
+          select.innerHTML = '';
+          json.data.forEach(org => {
+            const opt = document.createElement('option');
+            opt.value = org.slug;
+            opt.textContent = `${org.name}`;
+            if (org.slug === currentOrg) opt.selected = true;
+            select.appendChild(opt);
+          });
+          if (!json.data.some(o => o.slug === currentOrg)) {
+            currentOrg = json.data[0].slug;
+            select.value = currentOrg;
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching organizations list:', err);
+      }
+    }
+
     // Dismiss active call alert
     function dismissCallAlert() {
       document.getElementById('liveCallCard').classList.add('hidden');
@@ -876,8 +901,9 @@
     }
 
     // Initializer
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
+      await loadOrganizations();
       initSse();
       loadDashboard();
       setInterval(loadDashboard, 10000); // Background refresh safety net

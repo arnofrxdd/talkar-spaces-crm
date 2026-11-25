@@ -5,16 +5,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding Talkar Universal Spaces CRM database...');
 
-  // 0. Purge any non-Elite Co-Works organizations to keep exclusively Elite Co-Works
-  const purgeResult = await prisma.organization.deleteMany({
-    where: {
-      slug: { not: 'elite-coworks' }
-    }
-  });
-  if (purgeResult.count > 0) {
-    console.log(`🧹 Cleaned up ${purgeResult.count} non-Elite Co-Works organizations from database.`);
-  }
-
   // -------------------------------------------------------------------------
   // 1. Primary Tenant: Elite Co-Works (Coworking Demo Client)
   // -------------------------------------------------------------------------
