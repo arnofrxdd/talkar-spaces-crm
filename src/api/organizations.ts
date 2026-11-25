@@ -76,3 +76,30 @@ organizationsRouter.post('/', async (req: Request, res: Response) => {
     res.status(400).json({ success: false, error: error.message });
   }
 });
+
+// 6. Purge non-Elite organizations (Admin cleanup)
+organizationsRouter.post('/cleanup/keep-elite-only', async (_req: Request, res: Response) => {
+  try {
+    const deleted = await prisma.organization.deleteMany({
+      where: {
+        slug: { not: 'elite-coworks' }
+      }
+    });
+    res.json({ success: true, message: 'Cleaned up organizations. Kept only Elite Co-Works.', deletedCount: deleted.count });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 7. Delete organization by slug
+organizationsRouter.delete('/:slug', async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const deleted = await prisma.organization.delete({
+      where: { slug }
+    });
+    res.json({ success: true, message: `Organization ${slug} deleted successfully`, data: deleted });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});

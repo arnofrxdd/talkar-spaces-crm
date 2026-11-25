@@ -5,6 +5,16 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding Talkar Universal Spaces CRM database...');
 
+  // 0. Purge any non-Elite Co-Works organizations to keep exclusively Elite Co-Works
+  const purgeResult = await prisma.organization.deleteMany({
+    where: {
+      slug: { not: 'elite-coworks' }
+    }
+  });
+  if (purgeResult.count > 0) {
+    console.log(`🧹 Cleaned up ${purgeResult.count} non-Elite Co-Works organizations from database.`);
+  }
+
   // -------------------------------------------------------------------------
   // 1. Primary Tenant: Elite Co-Works (Coworking Demo Client)
   // -------------------------------------------------------------------------
@@ -266,61 +276,7 @@ async function main() {
     },
   });
 
-  // -------------------------------------------------------------------------
-  // 2. Second Multi-Industry Tenant: Prestige Luxury Properties (Real Estate)
-  // -------------------------------------------------------------------------
-  const prestige = await prisma.organization.upsert({
-    where: { slug: 'prestige-properties' },
-    update: {},
-    create: {
-      slug: 'prestige-properties',
-      name: 'Prestige Group Luxury Estates',
-      brand: 'Prestige Living',
-      industry: 'REAL_ESTATE',
-      tagline: 'Iconic residential towers and gated golf villas in Bengaluru',
-      phone: '+918025591234',
-      email: 'sales@prestigeconstructions.com',
-      currency: 'INR',
-      locationNoun: 'Project Site',
-      assetNoun: 'Apartment Unit',
-      visitNoun: 'Model Flat Site Visit',
-      visitCodePrefix: 'RECCE',
-    },
-  });
-
-  const whitefield = await prisma.location.upsert({
-    where: { organizationId_code: { organizationId: prestige.id, code: 'WHT' } },
-    update: {},
-    create: {
-      organizationId: prestige.id,
-      code: 'WHT',
-      name: 'Prestige Golfshire & Lakeside',
-      address: 'SH 104, Nandi Hills Road, Devanahalli, Bengaluru 562110',
-      city: 'Bengaluru',
-      managerName: 'Arjun Singhania',
-      managerPhone: '+919886011223',
-    },
-  });
-
-  await prisma.asset.upsert({
-    where: { organizationId_code: { organizationId: prestige.id, code: 'VILLA-4BHK' } },
-    update: {},
-    create: {
-      organizationId: prestige.id,
-      locationId: whitefield.id,
-      code: 'VILLA-4BHK',
-      name: '4BHK Golf Course Luxury Villa',
-      category: 'LONG_TERM',
-      startingPrice: 38500000.0,
-      pricingUnit: 'total price',
-      capacityPax: 6,
-      totalInventory: 8,
-      bookingMode: 'SITE_VISIT',
-      description: '4,500 sq.ft. private pool villa overlooking the 18-hole championship golf course.',
-    },
-  });
-
-  console.log('✅ Database seeded successfully with multi-tenant spaces & locations!');
+  console.log('✅ Database seeded successfully with Elite Co-Works coworking spaces & locations!');
 }
 
 main()
