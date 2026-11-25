@@ -733,7 +733,14 @@
       const locMap = {};
       locations.forEach(l => locMap[l.id] = l.name);
 
-      container.innerHTML = filteredAssets.map(a => `
+      container.innerHTML = filteredAssets.map(a => {
+        let badgeColor = a.category === 'SHORT_TERM' 
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+          : 'bg-blue-50 text-blue-700 border-blue-200';
+        let badgeText = a.category === 'SHORT_TERM' ? 'Instant Reserve' : 'Tour Walkthrough';
+        let pricingText = `${formatMoney(a.startingPrice)} <span class="text-[11px] font-normal text-slate-500">${a.pricingUnit || ''}</span>`;
+
+        return `
         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between hover:border-slate-300 transition">
           <div>
             <div class="flex items-start justify-between">
@@ -741,21 +748,20 @@
                 <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">${locMap[a.locationId] || 'Centre'}</span>
                 <h3 class="font-bold text-slate-900 text-sm mt-0.5">${a.name}</h3>
               </div>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">${a.type}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${badgeText}</span>
             </div>
             <p class="text-xs text-slate-600 mt-2">${a.description || 'Flexible executive space with high-speed internet and access to common business lounges.'}</p>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
-            <span class="text-slate-500">Capacity: <strong class="text-slate-800">${a.capacity} Pax</strong></span>
-            <div class="text-right">
-              <span class="text-xs font-bold text-slate-900">
-                ${a.priceHourly ? formatMoney(a.priceHourly) + '/hr' : formatMoney(a.priceDaily) + '/day'}
-              </span>
+            <span class="text-slate-500">Capacity: <strong class="text-slate-800">${a.capacityPax || 1} Pax</strong></span>
+            <div class="text-right font-bold text-slate-900">
+              ${pricingText}
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     // Open Action Modal (Create Visit or Booking)
