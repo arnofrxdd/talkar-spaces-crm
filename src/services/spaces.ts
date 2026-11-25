@@ -187,21 +187,27 @@ class SpacesService {
     });
 
     const isAvailable = activeBookings < asset.totalInventory;
-    const baseRate = asset.startingPrice * (asset.pricingUnit.includes('hour') ? durationHours : 1);
+    const duration = durationHours || 1;
+    const unitPrice = asset.startingPrice;
+    const subtotal = unitPrice * (asset.pricingUnit.includes('hour') ? duration : 1);
     const taxRate = 0.18; // Standard 18% GST for commercial space rentals
-    const taxAmount = Math.round(baseRate * taxRate);
-    const totalAmount = baseRate + taxAmount;
+    const taxAmount = Math.round(subtotal * taxRate);
+    const totalAmount = subtotal + taxAmount;
 
     return {
       available: isAvailable,
       assetName: asset.name,
       locationName: location.name,
       pricing: {
-        baseRate,
+        unitRate: unitPrice,
+        pricingUnit: asset.pricingUnit,
+        durationHours: duration,
+        subtotal,
         taxAmount,
         totalAmount,
         currency: org.currency,
-        pricingUnit: asset.pricingUnit,
+        quoteSummary: `₹${unitPrice.toLocaleString('en-IN')}/${asset.pricingUnit.includes('hour') ? 'hr' : 'seat'}, coming to ₹${totalAmount.toLocaleString('en-IN')} total (inclusive of 18% GST)`,
+        baseRate: subtotal,
       },
       photos: JSON.parse(asset.photos || '[]'),
       paxMax: asset.capacityPax,
